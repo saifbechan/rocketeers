@@ -1,16 +1,16 @@
-import P5, { Vector } from 'p5';
+import type P5 from 'p5';
 
-import Atlas from './Drawable/Atlas';
-import Obstacle from './Drawable/Obstacles/Obstacle';
-import Rocket from './Drawable/Rocket';
-import Target from './Drawable/Target';
-import Instructions from './Instructions';
+import type Atlas from './Drawable/Atlas';
+import type Obstacle from './Drawable/Obstacles/Obstacle';
+import type Rocket from './Drawable/Rocket';
+import type Target from './Drawable/Target';
+import type Instructions from './Instructions';
 
-type JourneyType = {
+interface JourneyType {
   distance: number;
   closest: number;
   reached: number;
-};
+}
 export default class Rocketeer {
   private readonly atlas: Atlas;
   private readonly rocket: Rocket;
@@ -22,13 +22,21 @@ export default class Rocketeer {
     closest: Infinity,
     reached: 0,
   };
-  private readonly logbook: Map<number, JourneyType> = new Map<number, JourneyType>();
+  private readonly logbook: Map<number, JourneyType> = new Map<
+    number,
+    JourneyType
+  >();
   private closest: number | undefined = undefined;
   private visits = 0;
   private crashed = 0;
   private fitness = 0;
 
-  constructor(atlas: Atlas, rocket: Rocket, instructions: Instructions, champion: number) {
+  constructor(
+    atlas: Atlas,
+    rocket: Rocket,
+    instructions: Instructions,
+    champion: number,
+  ) {
     this.atlas = atlas;
     this.rocket = rocket;
     this.instructions = instructions;
@@ -42,7 +50,7 @@ export default class Rocketeer {
   calcFitness(p5: P5, lifespan: number): number {
     this.fitness = 0;
     this.atlas.getTargets().forEach((target: Target, index: number) => {
-      const journey: JourneyType = this.logbook.get(index) || {
+      const journey: JourneyType = this.logbook.get(index) ?? {
         ...this.journey,
       };
       if (journey.closest === Infinity) return;
@@ -53,8 +61,8 @@ export default class Rocketeer {
       }
     });
 
-    const closest = this.closest === undefined ? -1 : this.closest;
-    const journey = this.logbook.get(closest) || {
+    const closest = this.closest ?? -1;
+    const journey = this.logbook.get(closest) ?? {
       ...this.journey,
     };
 
@@ -79,7 +87,10 @@ export default class Rocketeer {
       return;
     }
 
-    this.rocket.update(this.instructions.getStep(step));
+    const instruction = this.instructions.getStep(step);
+    if (instruction) {
+      this.rocket.update(instruction);
+    }
 
     this.atlas.getObstacles().forEach((obstacle: Obstacle) => {
       if (this.rocket.hasCrashedInto(obstacle)) {
@@ -93,15 +104,16 @@ export default class Rocketeer {
     }
 
     this.atlas.getTargets().forEach((target: Target, index: number) => {
-      if (this.closest === undefined) {
-        this.closest = index;
-      }
-      const journey: JourneyType = this.logbook.get(index) || {
+      this.closest ??= index;
+      const journey: JourneyType = this.logbook.get(index) ?? {
         ...this.journey,
       };
       if (journey.reached > 0) return;
 
-      const distance = this.rocket.distanceTo(target.getPosition(), target.getDiameter());
+      const distance = this.rocket.distanceTo(
+        target.getPosition(),
+        target.getDiameter(),
+      );
       const closest = Math.min(distance, journey.closest);
       if (index === this.closest && distance <= target.getDiameter()) {
         journey.reached = step;
@@ -130,7 +142,7 @@ export default class Rocketeer {
     return this.visits;
   }
 
-  getRocketPosition(): Vector {
+  getRocketPosition(): P5.Vector {
     return this.rocket.getPosition();
   }
 
@@ -139,7 +151,7 @@ export default class Rocketeer {
   }
 
   toString(): string {
-    return `Travelled: ${this.getRocketTravelled()}`;
+    return `Travelled: ${String(this.getRocketTravelled())}`;
   }
 
   countAndReturn(): number {

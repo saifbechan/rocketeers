@@ -1,91 +1,131 @@
+'use client';
+
 import { useEffect, useRef } from 'react';
 
-import P5, { Image } from 'p5';
+import type P5 from 'p5';
 
 import Atlas from './Entities/Drawable/Atlas';
 import Mission from './Entities/Mission';
-import { Explosion, Obstacles, Planets, Ships } from './Helpers/Config';
+import { ExplosionAssets, Obstacles, Planets, Ships } from './Helpers/Config';
 
-export default function Rocketeers(): null {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const inputEl: any = useRef(null);
+const Rocketeers = () => {
+  const inputEl = useRef<P5 | null>(null);
 
   useEffect(() => {
-    const rocketeers = 100;
+    const rocketeersCount = 100;
     let steps = 600;
     let generation = 1;
     let step = 0;
 
-    let mission: Mission;
+    let mission: Mission | undefined;
 
-    const images: Map<string, Image> = new Map<string, Image>();
+    const images: Map<string, P5.Image> = new Map<string, P5.Image>();
 
     if (inputEl.current !== null) {
       inputEl.current.remove();
       inputEl.current = null;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const p5 = require('p5');
-    inputEl.current = new p5((p: P5) => {
-      p.preload = (): void => {
-        if (process.env.NODE_ENV === 'test') return;
+    const initP5 = async () => {
+      const P5Class = (await import('p5')).default;
+      new P5Class((p: P5) => {
+        inputEl.current = p;
+        p.setup = () => {
+          const canvas = p.createCanvas(p.windowWidth - 4, p.windowHeight - 4);
+          canvas.attribute('role', 'rocketeers');
 
-        Object.values(Ships).forEach((ship: string) => {
-          images.set(ship, p.loadImage(`images/${ship}.png`));
-        });
+          if (process.env.NODE_ENV !== 'test') {
+            const load = async (key: string, path: string) => {
+              const img = await p.loadImage(path);
+              images.set(key, img);
+            };
 
-        Object.values(Planets).forEach((planet: string) => {
-          images.set(planet, p.loadImage(`images/${planet}.png`));
-        });
+            const promises: Promise<void>[] = [];
 
-        Object.values(Obstacles).forEach((layout: string) => {
-          images.set(layout, p.loadImage(`images/${layout}.png`));
-        });
+            Object.values(Ships).forEach((ship: string) => {
+              promises.push(load(ship, `images/${ship}.png`));
+            });
 
-        images.set(Explosion.SPRITE, p.loadImage(`images/${Explosion.SPRITE}.png`));
-      };
+            Object.values(Planets).forEach((planet: string) => {
+              promises.push(load(planet, `images/${planet}.png`));
+            });
 
-      p.setup = (): void => {
-        const canvas = p.createCanvas(p.windowWidth - 4, p.windowHeight - 4);
-        canvas.attribute('data-testid', 'rocketeers');
+            Object.values(Obstacles).forEach((layout: string) => {
+              promises.push(load(layout, `images/${layout}.png`));
+            });
 
-        mission = new Mission(
-          p,
-          images,
-          new Atlas(p, images, p.createGraphics(p.windowWidth - 4, p.windowHeight - 4))
-        );
-        mission.init(generation, steps, rocketeers);
-      };
+            promises.push(
+              load(
+                ExplosionAssets.SPRITE,
+                `images/${ExplosionAssets.SPRITE}.png`,
+              ),
+            );
 
-      p.draw = (): void => {
-        p.background(20, 21, 38);
-        mission.run(step);
-        step += 1;
-        if (step === steps) {
-          mission.evaluate(steps);
-
-          step = 0;
-          generation += 1;
-          if (generation >= 80) {
-            steps = 1600;
-          } else if (generation >= 40) {
-            steps = 1400;
-          } else if (generation >= 20) {
-            steps = 1000;
-          } else if (generation >= 5) {
-            steps = 800;
+            Promise.all(promises)
+              .then(() => {
+                mission = new Mission(
+                  p,
+                  images,
+                  new Atlas(
+                    p,
+                    images,
+                    p.createGraphics(p.windowWidth - 4, p.windowHeight - 4),
+                  ),
+                );
+                mission.init(generation, steps, rocketeersCount);
+              })
+              .catch((err: unknown) => {
+                console.error('Failed to load images', err);
+              });
+          } else {
+            mission = new Mission(
+              p,
+              images,
+              new Atlas(
+                p,
+                images,
+                p.createGraphics(p.windowWidth - 4, p.windowHeight - 4),
+              ),
+            );
+            mission.init(generation, steps, rocketeersCount);
           }
+        };
 
-          mission.init(generation, steps, rocketeers);
-        }
-      };
+        p.draw = (): void => {
+          if (!mission) return;
+          p.background(20, 21, 38);
+          mission.run(step);
+          step += 1;
+          if (step === steps) {
+            mission.evaluate(steps);
 
-      p.windowResized = (): void => {
-        window.location.reload();
-      };
+            step = 0;
+            generation += 1;
+            if (generation >= 80) {
+              steps = 1600;
+            } else if (generation >= 40) {
+              steps = 1400;
+            } else if (generation >= 20) {
+              steps = 1000;
+            } else if (generation >= 5) {
+              steps = 800;
+            }
+
+            mission.init(generation, steps, rocketeersCount);
+          }
+        };
+
+        p.windowResized = (): void => {
+          p.resizeCanvas(p.windowWidth - 4, p.windowHeight - 4);
+        };
+      });
+    };
+    initP5().catch((err: unknown) => {
+      console.error('Failed to initialize P5', err);
     });
   }, []);
 
   return null;
-}
+};
+
+export default Rocketeers;

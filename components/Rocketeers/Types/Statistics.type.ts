@@ -1,4 +1,4 @@
-export type MissionStatistics = {
+export interface MissionStatistics {
   instructions: number;
   reached: number;
   generation: number;
@@ -6,4 +6,4 @@ export type MissionStatistics = {
   maxtravel: number;
   champion: string;
   lifespan: number;
-};
+}

@@ -5,7 +5,7 @@ export enum Viewport {
   LG = 'LG',
 }
 
-export const getViewport = (width: number): string => {
+export const getViewport = (width: number): Viewport => {
   if (width >= 0 && width <= 767) {
     return Viewport.XS;
   }

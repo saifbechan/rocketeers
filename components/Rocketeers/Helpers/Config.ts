@@ -20,7 +20,10 @@ export enum Evolution {
   MAX_FORCE = 0.1,
 }
 
-export enum Explosion {
+export enum ExplosionAssets {
   SPRITE = 'explosion',
+}
+
+export enum ExplosionParams {
   SPEED = 0.25,
 }
