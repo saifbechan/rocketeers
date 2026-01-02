@@ -1,23 +1,23 @@
-import P5, { Image, Vector } from 'p5';
+import type P5 from 'p5';
 
-import { MissionStatistics } from '../Types/Statistics.type';
-import Atlas from './Drawable/Atlas';
+import { type MissionStatistics } from '../Types/Statistics.type';
+import type Atlas from './Drawable/Atlas';
 import Rocket from './Drawable/Rocket';
 import Instructions from './Instructions';
 import Rocketeer from './Rocketeer';
 
 export default class Mission {
   private readonly p5: P5;
-  private readonly images: Map<string, Image>;
+  private readonly images: Map<string, P5.Image>;
 
   private readonly atlas: Atlas;
   private readonly rocketeers: Rocketeer[] = [];
   private instructions: Instructions[] = [];
   private champion: Rocketeer | undefined;
   private statistics: MissionStatistics;
-  private trails: Vector[] = [];
+  private trails: P5.Vector[] = [];
 
-  constructor(p5: P5, images: Map<string, Image>, atlas: Atlas) {
+  constructor(p5: P5, images: Map<string, P5.Image>, atlas: Atlas) {
     this.p5 = p5;
     this.images = images;
     this.atlas = atlas;
@@ -45,14 +45,14 @@ export default class Mission {
           this.atlas,
           new Rocket(this.p5, this.images),
           this.champion.getInstructions(),
-          this.champion.countAndReturn()
+          this.champion.countAndReturn(),
         );
       } else {
         rocketeer = new Rocketeer(
           this.atlas,
           new Rocket(this.p5, this.images),
           new Instructions(this.p5, lifespan, this.instructions),
-          0
+          0,
         );
       }
       this.rocketeers[count] = rocketeer;
@@ -66,7 +66,8 @@ export default class Mission {
       const fitness = rocketeer.calcFitness(this.p5, lifespan);
       if (fitness > maxfit) {
         maxfit = fitness;
-        this.champion = rocketeer.countAndReturn() > 5 ? this.champion : rocketeer;
+        this.champion =
+          rocketeer.countAndReturn() > 5 ? this.champion : rocketeer;
       }
     });
     this.rocketeers.forEach((rocketeer: Rocketeer) => {
@@ -83,11 +84,8 @@ export default class Mission {
       ...this.statistics,
       instructions: this.instructions.length,
       fitness: Math.floor(maxfit),
-      champion: this.champion?.toString() || '',
+      champion: this.champion?.toString() ?? '',
     };
-
-    // eslint-disable-next-line no-console
-    console.log(this.statistics);
   }
 
   run(step: number): void {
@@ -100,7 +98,9 @@ export default class Mission {
       rocketeer.update(step);
       this.trails.push(rocketeer.getRocketPosition());
       reached += rocketeer.getVisits();
-      maxtravel = Math.floor(Math.max(maxtravel, rocketeer.getRocketTravelled()));
+      maxtravel = Math.floor(
+        Math.max(maxtravel, rocketeer.getRocketTravelled()),
+      );
     });
     this.statistics = {
       ...this.statistics,

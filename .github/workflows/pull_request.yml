@@ -1,9 +1,9 @@
-name: CI/CD [main]
+name: CI/CD [pull_request]
 
 env:
   CI: true
 on:
-  push:
+  pull_request:
     branches: [main]
 
 jobs:
@@ -25,23 +25,18 @@ jobs:
       - name: Run unit tests
         run: npm run test:ci
 
-  # For main, we assume Vercel auto-deploys to Production. 
-  # We wait for that deployment and then run E2E tests against Production.
-  e2e-production:
+  e2e-tests:
     needs: commit-check
     runs-on: ubuntu-latest
-    name: Vercel Prod & E2E 🌎
+    name: Vercel Preview & E2E 🧪
     steps:
       - uses: actions/checkout@v4
-      - name: WaitFor Vercel Production
+      - name: WaitFor Vercel Preview
         uses: patrickedqvist/wait-for-vercel-preview@v1.3.1
         id: waitForVercel
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           max_timeout: 300
-          # We ideally want to check for 'production' enviroment, 
-          # but this action finds the deployment associated with the commit.
-          # If main auto-deploys to prod, the commit deployment will be prod.
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -63,7 +58,40 @@ jobs:
       - name: Install Playwright system dependencies
         if: steps.playwright-cache.outputs.cache-hit == 'true'
         run: npx playwright install-deps
-      - name: Run E2E Tests on Prod
+      - name: Run E2E Tests
         run: npm run test:e2e
         env:
           BASE_URL: ${{ steps.waitForVercel.outputs.url }}
+          # PREPUSH is false here, so config uses BASE_URL and skips local webServer
+
+  lighthouse-audit:
+    needs: commit-check
+    runs-on: ubuntu-latest
+    name: Lighthouse Report 🚦
+    steps:
+      - uses: actions/checkout@v4
+      - name: WaitFor Vercel Preview
+        if: github.actor != 'dependabot[bot]'
+        uses: patrickedqvist/wait-for-vercel-preview@v1.3.1
+        id: waitForVercel
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          max_timeout: 300
+      
+      - name: Lighthouse Check (Mobile)
+        if: github.actor != 'dependabot[bot]'
+        uses: foo-software/lighthouse-check-action@master
+        with:
+          urls: ${{ steps.waitForVercel.outputs.url }}
+          gitHubAccessToken: ${{ secrets.GITHUB_TOKEN }}
+          prCommentEnabled: true
+          device: 'mobile'
+
+      - name: Lighthouse Check (Desktop)
+        if: github.actor != 'dependabot[bot]'
+        uses: foo-software/lighthouse-check-action@master
+        with:
+          urls: ${{ steps.waitForVercel.outputs.url }}
+          gitHubAccessToken: ${{ secrets.GITHUB_TOKEN }}
+          prCommentEnabled: true
+          device: 'desktop'

@@ -1,18 +1,18 @@
-import P5, { Image, Vector } from 'p5';
+import type P5 from 'p5';
 
-import { getViewport, Viewport } from '../../../Helpers/Viewport';
+import { Viewport, getViewport } from '../../../Helpers/Viewport';
 import Obstacle from './Obstacle';
 
 export default class Title extends Obstacle {
   private readonly p5: P5;
-  private readonly pos: Vector;
+  private readonly pos: P5.Vector;
 
-  private readonly image: Image;
+  private readonly image: P5.Image;
   private readonly scale;
   private readonly height;
   private width = 0;
 
-  constructor(p5: P5, image: Image) {
+  constructor(p5: P5, image: P5.Image) {
     super();
     this.p5 = p5;
     this.image = image;
@@ -35,7 +35,7 @@ export default class Title extends Obstacle {
     this.scale = (this.height / 5) * 4;
   }
 
-  checkCollision(position: Vector): boolean {
+  checkCollision(position: P5.Vector): boolean {
     return (
       position.x > this.pos.x - this.width / 2 &&
       position.x < this.pos.x + this.width / 2 &&
@@ -52,17 +52,13 @@ export default class Title extends Obstacle {
   }
 
   private drawIcon(): void {
-    if (!this.image) {
-      return;
-    }
-
     this.p5.imageMode(this.p5.CENTER);
     this.p5.image(
       this.image,
       this.pos.x - this.width / 1.9,
       this.pos.y - this.scale,
       this.scale,
-      this.scale
+      this.scale,
     );
   }
 
@@ -87,18 +83,30 @@ export default class Title extends Obstacle {
       case Viewport.XS:
         this.p5.textSize(10);
         this.p5.fill(255);
-        this.p5.text('artificial genetic algorithm by Saif Bechan', this.pos.x, this.pos.y + 20);
+        this.p5.text(
+          'artificial genetic algorithm by Saif Bechan',
+          this.pos.x,
+          this.pos.y + 20,
+        );
         break;
       case Viewport.SM:
       case Viewport.MD:
         this.p5.textSize(14);
         this.p5.fill(255);
-        this.p5.text('artificial genetic algorithm by Saif Bechan', this.pos.x, this.pos.y + 25);
+        this.p5.text(
+          'artificial genetic algorithm by Saif Bechan',
+          this.pos.x,
+          this.pos.y + 25,
+        );
         break;
       default:
         this.p5.textSize(16);
         this.p5.fill(255);
-        this.p5.text('artificial genetic algorithm by Saif Bechan', this.pos.x, this.pos.y + 30);
+        this.p5.text(
+          'artificial genetic algorithm by Saif Bechan',
+          this.pos.x,
+          this.pos.y + 30,
+        );
     }
   }
 }

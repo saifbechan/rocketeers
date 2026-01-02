@@ -1,0 +1,24 @@
+# --- Dependencies & Build Artifacts ---
+# (Usually in .gitignore, but explicit ignores improve performance)
+node_modules
+.next
+dist
+build
+.vercel
+out
+
+# --- Lockfiles (CRITICAL) ---
+# Prettier often corrupts these if it tries to 'fix' their formatting
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+bun.lockb
+
+# --- Next.js & Env ---
+next-env.d.ts
+.env
+.env.*
+
+# --- Assets ---
+# Prevent Prettier from trying to format large SVGs or generic files in public
+public/

@@ -1,26 +1,26 @@
-import { faGithub, faLinkedin, IconDefinition } from '@fortawesome/free-brands-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import dynamic from 'next/dynamic';
 import Image from 'next/image';
+import { type ComponentType } from 'react';
+import { type IconBaseProps } from 'react-icons';
+import rocketeer from './rocketeer.webp';
 
-import styles from './contact.module.scss';
-
-type LinkType = {
-  icon: IconDefinition;
+interface LinkType {
+  Icon: ComponentType<IconBaseProps>;
   name: string;
   handle: string;
   href: string;
-};
+}
 
-export default function Contact(): JSX.Element {
+const Contact = () => {
   const links: LinkType[] = [
     {
-      icon: faGithub,
+      Icon: dynamic(async () => (await import('react-icons/fa')).FaGithub),
       name: 'github',
       handle: '@saifbechan',
       href: 'https://github.com/saifbechan',
     },
     {
-      icon: faLinkedin,
+      Icon: dynamic(async () => (await import('react-icons/fa')).FaLinkedin),
       name: 'linkedIn',
       handle: '/in/saifbechan',
       href: 'https://www.linkedin.com/in/saifbechan/',
@@ -28,20 +28,31 @@ export default function Contact(): JSX.Element {
   ];
 
   return (
-    <div className={styles.contact}>
-      {links.map(
-        (link: LinkType): JSX.Element => (
-          <section className={styles.link} id={link.name} key={link.name}>
-            <a href={link.href} rel="noreferrer" target="_blank">
-              {`${link.name}: ${link.handle}`}
-              <FontAwesomeIcon icon={link.icon} />
+    <div
+      aria-label="Contact information"
+      className="absolute right-5 bottom-5 flex gap-6"
+    >
+      <div className="flex flex-col justify-between">
+        {links.map(({ Icon, name, handle, href }: LinkType) => (
+          <div key={name} className="flex items-center justify-end gap-1">
+            <a href={href} rel="noreferrer" target="_blank">
+              {`${name}: ${handle}`}
             </a>
-          </section>
-        )
-      )}
-      <div className={styles.imagewrapper}>
-        <Image alt="Rocketeer" src="/images/rocketeer.webp" layout="fill" />
+            <Icon className="ml-0.5 cursor-pointer" />
+          </div>
+        ))}
+      </div>
+      <div>
+        <Image
+          alt="Rocketeer"
+          height="50"
+          priority
+          src={rocketeer}
+          width="50"
+        />
       </div>
     </div>
   );
-}
+};
+
+export default Contact;

@@ -1,31 +1,31 @@
-import P5, { Graphics, Image, Vector } from 'p5';
+import type P5 from 'p5';
 
 import { Ships } from '../../Helpers/Config';
 import Explosion from './Explosion';
-import Obstacle from './Obstacles/Obstacle';
+import type Obstacle from './Obstacles/Obstacle';
 
 export default class Rocket {
   private readonly p5: P5;
-  private readonly images: Map<string, Image | Graphics>;
+  private readonly images: Map<string, P5.Image | P5.Graphics>;
   private explosion: Explosion;
 
   private travelled = 0;
 
-  private readonly pos: Vector;
-  private readonly vel: Vector;
-  private readonly acc: Vector;
+  private readonly pos: P5.Vector;
+  private readonly vel: P5.Vector;
+  private readonly acc: P5.Vector;
 
-  constructor(p5: P5, images: Map<string, Image | Graphics>) {
+  constructor(p5: P5, images: Map<string, P5.Image | P5.Graphics>) {
     this.p5 = p5;
     this.images = images;
     this.explosion = new Explosion(p5, images);
 
     this.pos = p5.createVector(p5.width / 2, p5.height - 10);
-    this.vel = p5.createVector();
-    this.acc = p5.createVector();
+    this.vel = p5.createVector(0, 0);
+    this.acc = p5.createVector(0, 0);
   }
 
-  distanceTo(pos: Vector, diameter: number): number {
+  distanceTo(pos: P5.Vector, diameter: number): number {
     return this.p5.dist(this.pos.x, this.pos.y, pos.x, pos.y) - diameter;
   }
 
@@ -35,7 +35,10 @@ export default class Rocket {
 
   isOffScreen(): boolean {
     return (
-      this.pos.y > this.p5.height || this.pos.x < 0 || this.pos.y < 0 || this.pos.x > this.p5.width
+      this.pos.y > this.p5.height ||
+      this.pos.x < 0 ||
+      this.pos.y < 0 ||
+      this.pos.x > this.p5.width
     );
   }
 
@@ -43,11 +46,11 @@ export default class Rocket {
     return this.travelled;
   }
 
-  getPosition(): Vector {
+  getPosition(): P5.Vector {
     return this.pos;
   }
 
-  update(step: Vector): void {
+  update(step: P5.Vector): void {
     const oldpos = this.pos.copy();
 
     this.acc.add(step);
@@ -86,10 +89,10 @@ export default class Rocket {
     const image = this.p5.createImage(1, 1);
     switch (champion) {
       case true:
-        this.p5.image(this.images.get(Ships.CHAMPION) || image, 0, 0, 30, 30);
+        this.p5.image(this.images.get(Ships.CHAMPION) ?? image, 0, 0, 30, 30);
         break;
       default:
-        this.p5.image(this.images.get(Ships.ROCKETEER) || image, 0, 0, 30, 30);
+        this.p5.image(this.images.get(Ships.ROCKETEER) ?? image, 0, 0, 30, 30);
         break;
     }
   }

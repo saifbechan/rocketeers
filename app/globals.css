@@ -1,0 +1,52 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-Bungee_Outline: var(--font-bungee-outline);
+
+  --color-primary-color: var(--primary-color);
+  --color-secondary-color: var(--secondary-color);
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+:root {
+    --primary-color: rgb(20 21 38);
+    --secondary-color: rgba(20, 21, 38, 0.5);
+}
+
+html,
+body {
+    background-color: var(--primary-color);
+    color: white;
+    font-family: var(--font-jura);
+    font-size: 14px;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    text-decoration: none;
+    transition: all 0.2s ease-in-out;
+}
+
+a:hover {
+    text-shadow: 0 0 10px deeppink;
+    color: burlywood;
+}
