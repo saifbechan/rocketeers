@@ -116,7 +116,7 @@ const Rocketeers = () => {
         };
 
         p.windowResized = (): void => {
-          p.resizeCanvas(p.windowWidth - 4, p.windowHeight - 4);
+          window.location.reload();
         };
       });
     };
