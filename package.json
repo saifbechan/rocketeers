@@ -52,7 +52,7 @@
     "jest": "^30.3.0",
     "jest-canvas-mock": "^2.5.2",
     "jest-environment-jsdom": "^30.3.0",
-    "jsdom": "^27.4.0",
+    "jsdom": "^29.0.0",
     "lint-staged": "^16.4.0",
     "p5": "^2.2.2",
     "postcss": "^8.5.8",
